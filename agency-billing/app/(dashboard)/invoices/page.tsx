@@ -18,6 +18,8 @@ type Invoice = {
   client?: {
     name: string;
   };
+  paidAmount?: number;
+  isPaid?: boolean;
 };
 
 type StatusFilter = "all" | "draft" | "sent" | "paid" | "overdue" | "void";
