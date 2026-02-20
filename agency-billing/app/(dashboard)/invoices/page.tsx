@@ -315,7 +315,7 @@ export default function InvoicesPage() {
                       <span className="text-sm text-muted-foreground">{invoice.created_by_name || "—"}</span>
                     </td>
                     <td className="py-4 px-4">
-                      <StatusBadge status={invoice.status} paid={invoice.isPaid} />
+                      <StatusBadge status={invoice.status} paid={invoice.isPaid ?? false} />
                     </td>
                     <td className="py-4 px-4 text-right">
                       <span className="text-sm font-semibold text-foreground">
