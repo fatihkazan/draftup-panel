@@ -375,7 +375,7 @@ export default function ReportsDashboardPage() {
                     contentStyle={TOOLTIP_STYLE.contentStyle}
                     labelStyle={TOOLTIP_STYLE.labelStyle}
                     itemStyle={TOOLTIP_STYLE.itemStyle}
-                    formatter={(v: number) => [formatMoney(v, revenueData.currency), ""]}
+                    formatter={(v: number | undefined) => [formatMoney(v ?? 0, revenueData.currency), ""]}
                   />
                   <Bar dataKey="amount" radius={[0, 4, 4, 0]}>
                     <Cell fill="oklch(0.7 0.18 145)" />
