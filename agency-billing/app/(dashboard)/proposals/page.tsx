@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Plus, Trash2, Pencil, FileText, Loader2, Search } from "lucide-react";
@@ -68,7 +68,7 @@ function StatusBadge({ status }: { status: string }) {
 
 /* ---------------- MAIN CONTENT ---------------- */
 
-export default function ProposalsPage() {
+function ProposalsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -517,5 +517,13 @@ const handleConvertToInvoice = async (e: React.MouseEvent, proposalId: string) =
         </div>
       )}
     </div>
+  );
+}
+
+export default function ProposalsPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-muted-foreground">Loading...</div>}>
+      <ProposalsPageContent />
+    </Suspense>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   DollarSign,
@@ -109,7 +109,7 @@ function reportFromQuery(q: string | null): ReportType {
   return "revenue";
 }
 
-export default function ReportsDashboardPage() {
+function ReportsDashboardPageContent() {
   const searchParams = useSearchParams();
   const reportParam = useMemo(() => reportFromQuery(searchParams.get("report")), [searchParams]);
   const now = new Date();
@@ -424,7 +424,7 @@ export default function ReportsDashboardPage() {
                       contentStyle={TOOLTIP_STYLE.contentStyle}
                       labelStyle={TOOLTIP_STYLE.labelStyle}
                       itemStyle={TOOLTIP_STYLE.itemStyle}
-                      formatter={(v: number) => [formatMoney(v, paymentsData.currency), ""]}
+                      formatter={(v: number | undefined) => [formatMoney(v ?? 0, paymentsData.currency), ""]}
                     />
                     <Bar dataKey="amount" radius={[4, 4, 0, 0]}>
                       {Object.entries(paymentsData.totals.breakdown_by_method).map((_, i) => (
@@ -512,7 +512,7 @@ export default function ReportsDashboardPage() {
                     contentStyle={TOOLTIP_STYLE.contentStyle}
                     labelStyle={TOOLTIP_STYLE.labelStyle}
                     itemStyle={TOOLTIP_STYLE.itemStyle}
-                    formatter={(v: number) => [formatMoney(v, invoiceStatusCurrency), ""]}
+                    formatter={(v: number | undefined) => [formatMoney(v ?? 0, invoiceStatusCurrency), ""]}
                   />
                   <Bar dataKey="amount" radius={[0, 4, 4, 0]}>
                     {statusConfig.map((_, i) => (
@@ -568,7 +568,7 @@ export default function ReportsDashboardPage() {
                     contentStyle={TOOLTIP_STYLE.contentStyle}
                     labelStyle={TOOLTIP_STYLE.labelStyle}
                     itemStyle={TOOLTIP_STYLE.itemStyle}
-                    formatter={(v: number) => [formatMoney(v, taxData.currency), ""]}
+                    formatter={(v: number | undefined) => [formatMoney(v ?? 0, taxData.currency), ""]}
                   />
                   <Bar dataKey="amount" radius={[0, 4, 4, 0]}>
                     <Cell fill="oklch(0.7 0.18 145)" />
@@ -600,5 +600,13 @@ export default function ReportsDashboardPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function ReportsDashboardPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-muted-foreground">Loading...</div>}>
+      <ReportsDashboardPageContent />
+    </Suspense>
   );
 }

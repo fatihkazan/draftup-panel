@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, X, Plus, Receipt } from "lucide-react";
@@ -51,7 +51,7 @@ function StatusBadge({ status, paid }: { status: string; paid: boolean }) {
   );
 }
 
-export default function InvoicesPage() {
+function InvoicesPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const clientFilter = searchParams.get("client") || "";
@@ -364,5 +364,13 @@ export default function InvoicesPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function InvoicesPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-muted-foreground">Loading...</div>}>
+      <InvoicesPageContent />
+    </Suspense>
   );
 }
