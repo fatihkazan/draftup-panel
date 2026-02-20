@@ -607,8 +607,8 @@ export default function DashboardPage() {
                     itemStyle={{ color: 'oklch(0.95 0 0)' }}
                     formatter={(value: number | undefined) => formatMoney(value ?? 0, agencyCurrency)}
                   />
-                  <Bar dataKey="invoiced" fill="oklch(0.7 0.18 145)" radius={[4, 4, 0, 0]} cursor={false} />
-                  <Bar dataKey="collected" fill="oklch(0.5 0.13 145)" radius={[4, 4, 0, 0]} cursor={false} />
+                  <Bar dataKey="invoiced" fill="oklch(0.7 0.18 145)" radius={[4, 4, 0, 0]} cursor={undefined} />
+                  <Bar dataKey="collected" fill="oklch(0.5 0.13 145)" radius={[4, 4, 0, 0]} cursor={undefined} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
