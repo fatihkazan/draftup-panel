@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { supabase } from "../../lib/supabaseClient";
 
@@ -10,14 +10,6 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get("token");
-    if (!token || token.trim() === "") {
-      window.location.href = "/login?message=Please+purchase+a+plan+first.";
-    }
-  }, []);
 
   async function register() {
     if (!fullName || !email || !password) {
