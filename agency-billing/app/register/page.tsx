@@ -4,31 +4,40 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { supabase } from "../../lib/supabaseClient";
 
-export default function LoginPage() {
+export default function RegisterPage() {
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const message = params.get("message");
-    if (message) setNotice(message);
+    const token = params.get("token");
+    if (!token || token.trim() === "") {
+      window.location.href = "/login?message=Please+purchase+a+plan+first.";
+    }
   }, []);
 
-  async function login() {
-    if (!email || !password) {
-      setError("Please enter your email and password.");
+  async function register() {
+    if (!fullName || !email || !password) {
+      setError("Please fill in all fields.");
+      return;
+    }
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
       return;
     }
 
     setError("");
     setLoading(true);
 
-    const { data, error: authError } = await supabase.auth.signInWithPassword({
+    const { error: authError } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: { full_name: fullName },
+      },
     });
 
     setLoading(false);
@@ -38,10 +47,7 @@ export default function LoginPage() {
       return;
     }
 
-    if (data.session) {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      window.location.href = "/clients";
-    }
+    window.location.href = "/";
   }
 
   return (
@@ -62,13 +68,28 @@ export default function LoginPage() {
           </div>
 
           <h1 className="mb-1 text-center text-xl font-semibold text-white">
-            Welcome back
+            Create an account
           </h1>
           <p className="mb-8 text-center text-sm text-zinc-400">
-            Sign in to your account
+            Get started for free
           </p>
 
           <div className="space-y-4">
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-zinc-400">
+                Full Name
+              </label>
+              <input
+                type="text"
+                className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-2.5 text-sm text-white placeholder-zinc-500 outline-none transition focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 disabled:opacity-50"
+                placeholder="Jane Smith"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                disabled={loading}
+                autoComplete="name"
+              />
+            </div>
+
             <div>
               <label className="mb-1.5 block text-xs font-medium text-zinc-400">
                 Email
@@ -94,17 +115,11 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && login()}
+                onKeyDown={(e) => e.key === "Enter" && register()}
                 disabled={loading}
-                autoComplete="current-password"
+                autoComplete="new-password"
               />
             </div>
-
-            {notice && (
-              <p className="rounded-lg border border-yellow-800/50 bg-yellow-950/40 px-3 py-2 text-xs text-yellow-400">
-                {notice}
-              </p>
-            )}
 
             {error && (
               <p className="rounded-lg border border-red-800/50 bg-red-950/40 px-3 py-2 text-xs text-red-400">
@@ -113,15 +128,24 @@ export default function LoginPage() {
             )}
 
             <button
-              onClick={login}
+              onClick={register}
               disabled={loading}
               className="mt-2 w-full rounded-xl py-2.5 text-sm font-semibold text-white transition hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
               style={{ backgroundColor: "#22C55E" }}
             >
-              {loading ? "Signing in…" : "Login"}
+              {loading ? "Creating account…" : "Create Account"}
             </button>
           </div>
 
+          <p className="mt-6 text-center text-sm text-zinc-500">
+            Already have an account?{" "}
+            <a
+              href="/login"
+              className="font-medium text-zinc-300 underline-offset-4 hover:underline"
+            >
+              Login
+            </a>
+          </p>
         </div>
       </div>
     </div>
