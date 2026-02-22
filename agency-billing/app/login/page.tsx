@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { supabase } from "../../lib/supabaseClient";
 
@@ -8,14 +8,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const message = params.get("message");
-    if (message) setNotice(message);
-  }, []);
 
   async function login() {
     if (!email || !password) {
@@ -99,12 +92,6 @@ export default function LoginPage() {
                 autoComplete="current-password"
               />
             </div>
-
-            {notice && (
-              <p className="rounded-lg border border-yellow-800/50 bg-yellow-950/40 px-3 py-2 text-xs text-yellow-400">
-                {notice}
-              </p>
-            )}
 
             {error && (
               <p className="rounded-lg border border-red-800/50 bg-red-950/40 px-3 py-2 text-xs text-red-400">
