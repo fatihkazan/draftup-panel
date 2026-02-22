@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   LayoutDashboard,
   Users,
@@ -16,6 +17,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { supabase } from "@/lib/supabaseClient";
 
 /* ---------------- TYPES ---------------- */
 
@@ -115,6 +117,35 @@ interface SidebarProps {
 
 export function Sidebar({ collapsed, onCollapsedChange }: SidebarProps) {
   const pathname = usePathname();
+  const [userName, setUserName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+  const [userInitials, setUserInitials] = useState("…");
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return;
+      const email = user.email ?? "";
+      const name =
+        (user.user_metadata?.full_name as string | undefined) ||
+        (user.user_metadata?.name as string | undefined) ||
+        email.split("@")[0] ||
+        "User";
+      const initials = name
+        .split(" ")
+        .map((w: string) => w[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2);
+      setUserName(name);
+      setUserEmail(email);
+      setUserInitials(initials);
+    });
+  }, []);
+
+  async function handleSignOut() {
+    await supabase.auth.signOut();
+    window.location.href = "/login";
+  }
 
   const isItemActive = (href: string): boolean => {
     if (href === "/") {
@@ -186,16 +217,17 @@ export function Sidebar({ collapsed, onCollapsedChange }: SidebarProps) {
 
       {/* User Profile */}
       <div className="p-3 border-t border-sidebar-border shrink-0">
-        <div className="flex items-center gap-3 rounded-xl p-3 hover:bg-sidebar-accent/50 cursor-pointer transition-colors">
+        <div className="flex items-center gap-3 rounded-xl p-3 hover:bg-sidebar-accent/50 transition-colors">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-accent to-accent/80 text-sm font-semibold text-accent-foreground">
-            AO
+            {userInitials}
           </div>
           <div className={`flex-1 min-w-0 transition-all duration-200 ${collapsed ? "opacity-0 w-0 min-w-0 overflow-hidden" : ""}`}>
-            <div className="text-sm font-medium text-sidebar-foreground truncate">Agency Owner</div>
-            <div className="text-xs text-muted-foreground truncate">owner@agency.com</div>
+            <div className="text-sm font-medium text-sidebar-foreground truncate">{userName}</div>
+            <div className="text-xs text-muted-foreground truncate">{userEmail}</div>
           </div>
           <button
             type="button"
+            onClick={handleSignOut}
             className="p-2 text-muted-foreground hover:text-sidebar-foreground rounded-lg hover:bg-sidebar-accent transition-colors shrink-0"
             aria-label="Sign out"
           >
