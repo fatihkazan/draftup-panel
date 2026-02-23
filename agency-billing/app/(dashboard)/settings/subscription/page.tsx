@@ -10,6 +10,13 @@ import {
   type PlanKey,
 } from "@/lib/subscription-plans";
 
+const CHECKOUT_URLS: Record<PlanKey, string> = {
+  freelancer: "https://draftup.lemonsqueezy.com/checkout/buy/929f6b32-b7e5-4364-b8e8-f3f923d75cb2",
+  starter: "https://draftup.lemonsqueezy.com/checkout/buy/c4f2026b-d6d0-4426-9d7f-40aa3bb0feeb",
+  growth: "https://draftup.lemonsqueezy.com/checkout/buy/782eb6ff-2248-4ed3-8998-6f1b92f74712",
+  scale: "https://draftup.lemonsqueezy.com/checkout/buy/700085c2-d105-4c79-8200-cdd78ea01cf7",
+};
+
 export default function SubscriptionPage() {
   const [loading, setLoading] = useState(true);
   const [agencyName, setAgencyName] = useState("");
@@ -122,7 +129,7 @@ export default function SubscriptionPage() {
                 Plan Overview
               </h3>
               <a
-                href={withCheckoutUserId("https://www.offero.co")}
+                href={withCheckoutUserId(CHECKOUT_URLS[planKey])}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="shrink-0 rounded-xl bg-[#10b981] px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent/90 transition-colors"
