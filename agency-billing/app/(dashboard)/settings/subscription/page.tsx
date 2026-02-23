@@ -17,6 +17,12 @@ const CHECKOUT_URLS: Record<PlanKey, string> = {
   scale: "https://draftup.lemonsqueezy.com/checkout/buy/700085c2-d105-4c79-8200-cdd78ea01cf7",
 };
 
+const NEXT_PLAN: Partial<Record<PlanKey, PlanKey>> = {
+  freelancer: "starter",
+  starter: "growth",
+  growth: "scale",
+};
+
 export default function SubscriptionPage() {
   const [loading, setLoading] = useState(true);
   const [agencyName, setAgencyName] = useState("");
@@ -89,6 +95,7 @@ export default function SubscriptionPage() {
 
   const plan = SUBSCRIPTION_PLANS[planKey];
   const display = PLAN_DISPLAY[planKey];
+  const nextPlanKey = NEXT_PLAN[planKey];
   const invoiceLimit = plan.monthlyInvoiceLimit;
   const usedInvoices = invoicesThisMonth;
   const remainingInvoices =
@@ -127,14 +134,14 @@ export default function SubscriptionPage() {
                 <CreditCard size={18} />
                 Plan Overview
               </h3>
-              {userId && (
+              {userId && nextPlanKey && (
                 <a
-                  href={withCheckoutUserId(CHECKOUT_URLS[planKey])}
+                  href={withCheckoutUserId(CHECKOUT_URLS[nextPlanKey])}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="shrink-0 rounded-xl bg-[#10b981] px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent/90 transition-colors"
                 >
-                  Upgrade plan
+                  Upgrade to {PLAN_DISPLAY[nextPlanKey].name}
                 </a>
               )}
             </div>
