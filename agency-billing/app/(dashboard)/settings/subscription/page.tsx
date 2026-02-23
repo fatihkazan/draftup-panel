@@ -29,10 +29,15 @@ export default function SubscriptionPage() {
     load();
   }, []);
 
+  useEffect(() => {
+    console.log("Subscription userId:", userId);
+  }, [userId]);
+
   async function load() {
     setLoading(true);
 
     const { data: { user } } = await supabase.auth.getUser();
+    console.log("supabase.auth.getUser() user:", user?.id);
     if (!user) {
       setLoading(false);
       return;
@@ -122,14 +127,16 @@ export default function SubscriptionPage() {
                 <CreditCard size={18} />
                 Plan Overview
               </h3>
-              <a
-                href={withCheckoutUserId(CHECKOUT_URLS[planKey])}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="shrink-0 rounded-xl bg-[#10b981] px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent/90 transition-colors"
-              >
-                Upgrade plan
-              </a>
+              {userId && (
+                <a
+                  href={withCheckoutUserId(CHECKOUT_URLS[planKey])}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="shrink-0 rounded-xl bg-[#10b981] px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent/90 transition-colors"
+                >
+                  Upgrade plan
+                </a>
+              )}
             </div>
             <div className="space-y-3">
               <div>
