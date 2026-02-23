@@ -98,13 +98,7 @@ export default function SubscriptionPage() {
 
   const withCheckoutUserId = (url: string) => {
     if (!userId) return url;
-    try {
-      const parsed = new URL(url);
-      parsed.searchParams.set("checkout[custom][user_id]", userId);
-      return parsed.toString();
-    } catch {
-      return url;
-    }
+    return `${url}?checkout[custom][user_id]=${userId}`;
   };
 
   return (
