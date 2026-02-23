@@ -16,6 +16,7 @@ export default function SubscriptionPage() {
   const [invoicesThisMonth, setInvoicesThisMonth] = useState(0);
   const [planKey, setPlanKey] = useState<PlanKey>("freelancer");
   const [activeUserCount, setActiveUserCount] = useState(1);
+  const [userId, setUserId] = useState("");
 
   useEffect(() => {
     load();
@@ -29,6 +30,7 @@ export default function SubscriptionPage() {
       setLoading(false);
       return;
     }
+    setUserId(user.id);
 
     const { data: agencyData } = await supabase
       .from("agency_settings")
@@ -87,6 +89,17 @@ export default function SubscriptionPage() {
   const userLimit = plan.userLimit;
   const activeUsers = activeUserCount;
 
+  const withCheckoutUserId = (url: string) => {
+    if (!userId) return url;
+    try {
+      const parsed = new URL(url);
+      parsed.searchParams.set("checkout[custom][user_id]", userId);
+      return parsed.toString();
+    } catch {
+      return url;
+    }
+  };
+
   return (
     <div>
       <div className="mb-6">
@@ -109,7 +122,7 @@ export default function SubscriptionPage() {
                 Plan Overview
               </h3>
               <a
-                href="https://www.offero.co"
+                href={withCheckoutUserId("https://www.offero.co")}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="shrink-0 rounded-xl bg-[#10b981] px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent/90 transition-colors"

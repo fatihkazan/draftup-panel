@@ -91,19 +91,8 @@ export async function POST(request: NextRequest) {
   const meta = (payload.meta as Record<string, unknown>) ?? {};
   const data = (payload.data as Record<string, unknown>) ?? {};
   const attributes = (data.attributes as Record<string, unknown>) ?? {};
-  const customData = (meta.custom_data as Record<string, unknown>) ?? {};
-
-  // Resolve customer email
-  const email: string =
-    (customData.email as string | undefined) ||
-    (attributes.user_email as string | undefined) ||
-    (attributes.customer_email as string | undefined) ||
-    "";
-
-  if (!email) {
-    console.warn("[LS webhook] Could not determine customer email", { eventName });
-    return NextResponse.json({ received: true }, { status: 200 });
-  }
+  const customDataRaw = meta.custom_data as Record<string, unknown> | undefined;
+  const customData = customDataRaw ?? {};
 
   // Resolve plan key from product name
   const productName: string =
@@ -128,21 +117,58 @@ export async function POST(request: NextRequest) {
 
   const billingCycle = resolveBillingCycle(variantName, interval);
 
-  // Find user by email in Supabase auth
+  // Find user by custom_data.user_id first. Fall back to email lookup only
+  // when custom_data is not present at all.
   const supabase = createServerClient();
+  let user:
+    | { id: string; email?: string | null }
+    | undefined;
+  let resolvedEmail = "";
 
-  const { data: usersData, error: usersError } = await supabase.auth.admin.listUsers();
-  if (usersError) {
-    console.error("[LS webhook] Failed to list users", usersError);
-    return NextResponse.json({ received: true }, { status: 200 });
+  if (customDataRaw) {
+    const customUserId = customData.user_id as string | undefined;
+    if (!customUserId) {
+      console.warn("[LS webhook] custom_data present but user_id missing", { eventName });
+      return NextResponse.json({ received: true }, { status: 200 });
+    }
+
+    const { data: byIdData, error: byIdError } = await supabase.auth.admin.getUserById(customUserId);
+    if (byIdError || !byIdData?.user) {
+      console.warn("[LS webhook] No Supabase user found for custom user_id:", customUserId);
+      return NextResponse.json({ received: true }, { status: 200 });
+    }
+
+    user = { id: byIdData.user.id, email: byIdData.user.email };
+    resolvedEmail = byIdData.user.email ?? "";
+  } else {
+    const email: string =
+      (attributes.user_email as string | undefined) ||
+      (attributes.customer_email as string | undefined) ||
+      "";
+
+    if (!email) {
+      console.warn("[LS webhook] Could not determine customer email", { eventName });
+      return NextResponse.json({ received: true }, { status: 200 });
+    }
+
+    const { data: usersData, error: usersError } = await supabase.auth.admin.listUsers();
+    if (usersError) {
+      console.error("[LS webhook] Failed to list users", usersError);
+      return NextResponse.json({ received: true }, { status: 200 });
+    }
+
+    const found = usersData.users.find(
+      (u) => u.email?.toLowerCase() === email.toLowerCase()
+    );
+
+    if (found) {
+      user = { id: found.id, email: found.email };
+      resolvedEmail = found.email ?? email;
+    }
   }
 
-  const user = usersData.users.find(
-    (u) => u.email?.toLowerCase() === email.toLowerCase()
-  );
-
   if (!user) {
-    console.warn("[LS webhook] No Supabase user found for email:", email);
+    console.warn("[LS webhook] No Supabase user resolved for webhook event", { eventName });
     return NextResponse.json({ received: true }, { status: 200 });
   }
 
@@ -163,7 +189,7 @@ export async function POST(request: NextRequest) {
 
   console.log("[LS webhook] Subscription synced", {
     eventName,
-    email,
+    email: resolvedEmail,
     userId: user.id,
     planKey,
     billingCycle,
