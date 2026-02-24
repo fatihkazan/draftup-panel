@@ -116,6 +116,10 @@ export async function POST(request: NextRequest) {
   }
 
   const billingCycle = resolveBillingCycle(variantName, interval);
+  const webhookEmail: string =
+    (attributes.user_email as string | undefined) ||
+    (attributes.customer_email as string | undefined) ||
+    "";
 
   // Find user by custom_data.user_id first. Fall back to email lookup only
   // when custom_data is not present at all.
@@ -141,12 +145,7 @@ export async function POST(request: NextRequest) {
     user = { id: byIdData.user.id, email: byIdData.user.email };
     resolvedEmail = byIdData.user.email ?? "";
   } else {
-    const email: string =
-      (attributes.user_email as string | undefined) ||
-      (attributes.customer_email as string | undefined) ||
-      "";
-
-    if (!email) {
+    if (!webhookEmail) {
       console.warn("[LS webhook] Could not determine customer email", { eventName });
       return NextResponse.json({ received: true }, { status: 200 });
     }
@@ -158,39 +157,71 @@ export async function POST(request: NextRequest) {
     }
 
     const found = usersData.users.find(
-      (u) => u.email?.toLowerCase() === email.toLowerCase()
+      (u) => u.email?.toLowerCase() === webhookEmail.toLowerCase()
     );
 
     if (found) {
       user = { id: found.id, email: found.email };
-      resolvedEmail = found.email ?? email;
+      resolvedEmail = found.email ?? webhookEmail;
     }
   }
 
-  if (!user) {
+  if (!user && eventName !== "order_created") {
     console.warn("[LS webhook] No Supabase user resolved for webhook event", { eventName });
     return NextResponse.json({ received: true }, { status: 200 });
   }
 
-  // Update agency_settings for this user
-  const { error: updateError } = await supabase
-    .from("agency_settings")
-    .update({
-      subscription_status: "active",
-      subscription_plan: planKey,
-      billing_cycle: billingCycle,
-    })
-    .eq("user_id", user.id);
+  if (user) {
+    // Update agency_settings for this user when already known.
+    const { error: updateError } = await supabase
+      .from("agency_settings")
+      .update({
+        subscription_status: "active",
+        subscription_plan: planKey,
+        billing_cycle: billingCycle,
+      })
+      .eq("user_id", user.id);
 
-  if (updateError) {
-    console.error("[LS webhook] Failed to update agency_settings", updateError);
-    return NextResponse.json({ received: true }, { status: 200 });
+    if (updateError) {
+      console.error("[LS webhook] Failed to update agency_settings", updateError);
+      return NextResponse.json({ received: true }, { status: 200 });
+    }
+  }
+
+  if (eventName === "order_created") {
+    const registrationEmail = (resolvedEmail || webhookEmail).trim().toLowerCase();
+    if (!registrationEmail) {
+      console.warn("[LS webhook] Could not create registration token: missing email");
+      return NextResponse.json({ received: true }, { status: 200 });
+    }
+
+    const token = crypto.randomUUID();
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    const { error: tokenError } = await supabase.from("registration_tokens").insert({
+      token,
+      email: registrationEmail,
+      subscription_plan: planKey,
+      used: false,
+      expires_at: expiresAt,
+    });
+
+    if (tokenError) {
+      console.error("[LS webhook] Failed to create registration token", tokenError);
+      return NextResponse.json({ received: true }, { status: 200 });
+    }
+
+    console.log("[LS webhook] Registration token created", {
+      email: registrationEmail,
+      token,
+      planKey,
+      expiresAt,
+    });
   }
 
   console.log("[LS webhook] Subscription synced", {
     eventName,
     email: resolvedEmail,
-    userId: user.id,
+    userId: user?.id,
     planKey,
     billingCycle,
   });

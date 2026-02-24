@@ -1,17 +1,75 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import { supabase } from "../../lib/supabaseClient";
 
+const LANDING_PAGE_URL = "https://draftup.co";
+
 export default function RegisterPage() {
+  const searchParams = useSearchParams();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [token, setToken] = useState("");
+  const [tokenValidated, setTokenValidated] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    let cancelled = false;
+    const tokenFromQuery = searchParams.get("token")?.trim() ?? "";
+
+    if (!tokenFromQuery) {
+      window.location.replace(LANDING_PAGE_URL);
+      return;
+    }
+
+    async function validateToken() {
+      try {
+        const response = await fetch(
+          `/api/register-token?token=${encodeURIComponent(tokenFromQuery)}`,
+          { cache: "no-store" }
+        );
+
+        if (!response.ok) {
+          window.location.replace(LANDING_PAGE_URL);
+          return;
+        }
+
+        const payload = (await response.json()) as {
+          valid?: boolean;
+          email?: string;
+        };
+
+        if (!payload.valid || !payload.email) {
+          window.location.replace(LANDING_PAGE_URL);
+          return;
+        }
+
+        if (!cancelled) {
+          setToken(tokenFromQuery);
+          setEmail(payload.email);
+          setTokenValidated(true);
+        }
+      } catch {
+        window.location.replace(LANDING_PAGE_URL);
+      }
+    }
+
+    validateToken();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [searchParams]);
+
   async function register() {
+    if (!tokenValidated || !token) {
+      return;
+    }
+
     if (!fullName || !email || !password) {
       setError("Please fill in all fields.");
       return;
@@ -36,6 +94,17 @@ export default function RegisterPage() {
 
     if (authError) {
       setError(authError.message);
+      return;
+    }
+
+    const consumeResponse = await fetch("/api/register-token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, email }),
+    });
+
+    if (!consumeResponse.ok) {
+      setError("Account created, but token finalization failed. Please contact support.");
       return;
     }
 
@@ -92,7 +161,8 @@ export default function RegisterPage() {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                disabled={loading}
+                disabled={loading || !tokenValidated}
+                readOnly
                 autoComplete="email"
               />
             </div>
@@ -121,11 +191,11 @@ export default function RegisterPage() {
 
             <button
               onClick={register}
-              disabled={loading}
+              disabled={loading || !tokenValidated}
               className="mt-2 w-full rounded-xl py-2.5 text-sm font-semibold text-white transition hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
               style={{ backgroundColor: "#22C55E" }}
             >
-              {loading ? "Creating account…" : "Create Account"}
+              {loading ? "Creating account…" : tokenValidated ? "Create Account" : "Validating link…"}
             </button>
           </div>
 
