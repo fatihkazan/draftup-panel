@@ -2,11 +2,9 @@
 
 import { FormEvent, useEffect, useState } from "react";
 
-const LANDING_PAGE_URL = "https://draftup.co";
-
 export default function WelcomePage() {
   const [email, setEmail] = useState("");
-  const [needsManualEmail, setNeedsManualEmail] = useState(false);
+  const [initializing, setInitializing] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -42,14 +40,10 @@ export default function WelcomePage() {
 
   useEffect(() => {
     const emailFromQuery = new URLSearchParams(window.location.search).get("email")?.trim() ?? "";
-
-    if (!emailFromQuery) {
-      setNeedsManualEmail(true);
-      return;
+    if (emailFromQuery) {
+      setEmail(emailFromQuery);
     }
-
-    setEmail(emailFromQuery);
-    resolveRegistrationToken(emailFromQuery);
+    setInitializing(false);
   }, []);
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -59,7 +53,9 @@ export default function WelcomePage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: "#0a0a0a" }}>
-      {needsManualEmail ? (
+      {initializing ? (
+        <p className="text-sm text-zinc-300">Welcome! Setting up your account...</p>
+      ) : (
         <form onSubmit={onSubmit} className="w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-900 px-6 py-7">
           <h1 className="mb-4 text-center text-base font-semibold text-white">
             Enter the email you used to purchase
@@ -83,8 +79,6 @@ export default function WelcomePage() {
             {loading ? "Checking..." : "Continue"}
           </button>
         </form>
-      ) : (
-        <p className="text-sm text-zinc-300">Welcome! Setting up your account...</p>
       )}
     </div>
   );
