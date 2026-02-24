@@ -2,13 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
 import { supabase } from "../../lib/supabaseClient";
 
 const LANDING_PAGE_URL = "https://draftup.co";
 
 export default function RegisterPage() {
-  const searchParams = useSearchParams();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,7 +17,7 @@ export default function RegisterPage() {
 
   useEffect(() => {
     let cancelled = false;
-    const tokenFromQuery = searchParams.get("token")?.trim() ?? "";
+    const tokenFromQuery = new URLSearchParams(window.location.search).get("token")?.trim() ?? "";
 
     if (!tokenFromQuery) {
       window.location.replace(LANDING_PAGE_URL);
@@ -63,7 +61,7 @@ export default function RegisterPage() {
     return () => {
       cancelled = true;
     };
-  }, [searchParams]);
+  }, []);
 
   async function register() {
     if (!tokenValidated || !token) {
