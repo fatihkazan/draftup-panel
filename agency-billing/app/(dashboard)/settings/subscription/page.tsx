@@ -22,6 +22,7 @@ const NEXT_PLAN: Partial<Record<PlanKey, PlanKey>> = {
   starter: "growth",
   growth: "scale",
 };
+const CHECKOUT_REDIRECT_URL = "https://app.draftup.co/welcome?email={customer_email}";
 
 export default function SubscriptionPage() {
   const [loading, setLoading] = useState(true);
@@ -109,8 +110,12 @@ export default function SubscriptionPage() {
   const activeUsers = activeUserCount;
 
   const withCheckoutUserId = (url: string) => {
-    if (!userId) return url;
-    return `${url}?checkout[custom][user_id]=${userId}`;
+    const params = new URLSearchParams();
+    if (userId) {
+      params.set("checkout[custom][user_id]", userId);
+    }
+    params.set("checkout[success_url]", CHECKOUT_REDIRECT_URL);
+    return `${url}?${params.toString()}`;
   };
 
   return (
