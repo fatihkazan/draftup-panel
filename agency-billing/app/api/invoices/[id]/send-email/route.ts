@@ -74,8 +74,8 @@ export async function POST(
       );
     }
 
-    // Generate invoice URL
-    const invoiceUrl = `${request.nextUrl.origin}/i/${invoice.public_token}`;
+    // Generate payment URL
+    const invoiceUrl = `${request.nextUrl.origin}/pay/${invoice.id}`;
 
     // Attach PDF if pdf_url exists
     let attachments: { filename: string; content: string }[] = [];

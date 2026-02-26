@@ -969,7 +969,7 @@ if (data.invoice_items && Array.isArray(data.invoice_items)) {
           </div>
 
           {/* Payment Link Card */}
-          {invoice.public_token && (
+          {hasPdf && (
             <div className="rounded-2xl bg-card border border-border p-6">
               <h3 className="text-sm font-semibold text-foreground mb-4">
                 Payment Link
@@ -981,13 +981,13 @@ if (data.invoice_items && Array.isArray(data.invoice_items)) {
                 <input
                   type="text"
                   readOnly
-                  value={`${typeof window !== "undefined" ? window.location.origin : ""}/i/${invoice.public_token}`}
+                  value={`${typeof window !== "undefined" ? window.location.origin : ""}/pay/${invoice.id}`}
                   className="flex-1 rounded-lg bg-secondary border border-border px-3 py-2 text-xs text-muted-foreground truncate"
                 />
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(
-                      `${window.location.origin}/i/${invoice.public_token}`
+                      `${window.location.origin}/pay/${invoice.id}`
                     );
                     setStatusMessage("Link copied to clipboard!");
                     setTimeout(() => setStatusMessage(""), 2000);
