@@ -59,7 +59,8 @@ const styles = StyleSheet.create({
     width: "36%",
     minHeight: 78,
     borderRadius: 8,
-    backgroundColor: "#1a1a1a",
+    borderWidth: 1,
+    borderColor: "#ececec",
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 10,
@@ -71,7 +72,7 @@ const styles = StyleSheet.create({
     objectFit: "contain",
   },
   logoFallbackText: {
-    color: "#d4d4d8",
+    color: "#6b7280",
     fontSize: 11,
     letterSpacing: 0.4,
   },

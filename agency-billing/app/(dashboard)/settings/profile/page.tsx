@@ -338,11 +338,11 @@ export default function ProfilePage() {
           </p>
           <div className="flex items-center gap-4">
             {logoUrl ? (
-              <div className="h-16 w-32 rounded-xl border border-border bg-secondary flex items-center justify-center overflow-hidden">
+              <div className="h-16 w-32 rounded-xl border border-border bg-white flex items-center justify-center overflow-hidden">
                 <img src={logoUrl} alt="Agency logo" className="h-full w-full object-contain p-2" />
               </div>
             ) : (
-              <div className="h-16 w-32 rounded-xl border border-dashed border-border bg-secondary flex items-center justify-center">
+              <div className="h-16 w-32 rounded-xl border border-dashed border-border bg-transparent flex items-center justify-center">
                 <span className="text-xs text-muted-foreground">No logo</span>
               </div>
             )}
@@ -357,6 +357,12 @@ export default function ProfilePage() {
                 {uploadingLogo ? "Uploading..." : "Upload Logo"}
               </label>
               <p className="text-xs text-muted-foreground mt-2">PNG, JPG up to 2MB</p>
+              <p className="mt-2 flex items-start gap-1.5 text-xs text-amber-300">
+                <span aria-hidden>⚠️</span>
+                <span>
+                  For best results, upload a logo with a dark or colorful design. White-only logos may not be visible on light backgrounds.
+                </span>
+              </p>
             </div>
           </div>
         </div>
