@@ -279,8 +279,8 @@ const ProposalPdfDocument: React.FC<{ data: ProposalData }> = ({ data }) => (
             key={item.id || index}
             style={[
               styles.tableRow,
-              index % 2 === 1 ? styles.tableRowAlt : null,
-              index === data.items.length - 1 ? { borderBottomWidth: 0 } : null,
+              index % 2 === 1 ? styles.tableRowAlt : {},
+              index === data.items.length - 1 ? { borderBottomWidth: 0 } : {},
             ]}
           >
             <View style={styles.tableCol1}>
