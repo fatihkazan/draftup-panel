@@ -41,106 +41,180 @@ interface ProposalData {
 
 const styles = StyleSheet.create({
   page: {
-    padding: 40,
+    paddingTop: 36,
+    paddingHorizontal: 36,
+    paddingBottom: 30,
     fontSize: 10,
     fontFamily: "Helvetica",
     backgroundColor: "#ffffff",
   },
   header: {
-    marginBottom: 30,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 5,
-    color: "#1a1a1a",
-  },
-  subtitle: {
-    fontSize: 11,
-    color: "#666666",
-  },
-  row: {
     flexDirection: "row" as const,
     justifyContent: "space-between",
-    marginBottom: 15,
+    alignItems: "stretch",
+    marginBottom: 28,
+    gap: 16,
   },
-  column: {
+  logoBox: {
+    width: "36%",
+    minHeight: 78,
+    borderRadius: 8,
+    backgroundColor: "#1a1a1a",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+  },
+  logoImage: {
+    width: "100%",
+    maxHeight: 58,
+    objectFit: "contain",
+  },
+  logoFallbackText: {
+    color: "#d4d4d8",
+    fontSize: 11,
+    letterSpacing: 0.4,
+  },
+  headerRight: {
+    width: "62%",
+    justifyContent: "flex-start",
+    alignItems: "flex-end",
+    textAlign: "right" as const,
+  },
+  proposalTitle: {
+    fontSize: 30,
+    fontWeight: "bold",
+    letterSpacing: 0.8,
+    color: "#1a1a1a",
+  },
+  proposalMeta: {
+    marginTop: 6,
+    fontSize: 10,
+    color: "#52525b",
+    lineHeight: 1.5,
+  },
+  fromToRow: {
+    flexDirection: "row" as const,
+    justifyContent: "space-between",
+    marginBottom: 22,
+    gap: 18,
+  },
+  infoColumn: {
     flex: 1,
+    borderWidth: 1,
+    borderColor: "#ececec",
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
   },
-  label: {
-    fontSize: 9,
-    color: "#666666",
-    marginBottom: 4,
+  sectionLabel: {
+    fontSize: 8,
+    color: "#9ca3af",
+    marginBottom: 6,
     textTransform: "uppercase",
+    letterSpacing: 1.2,
   },
-  value: {
+  infoValue: {
     fontSize: 11,
     color: "#1a1a1a",
-    marginBottom: 2,
+    marginBottom: 3,
+    lineHeight: 1.35,
   },
   section: {
-    marginBottom: 20,
+    marginBottom: 0,
   },
   table: {
-    marginBottom: 20,
+    marginBottom: 18,
+    borderWidth: 1,
+    borderColor: "#ececec",
+    borderRadius: 8,
+    overflow: "hidden",
   },
   tableHeader: {
     flexDirection: "row" as const,
+    backgroundColor: "#f5f5f5",
     borderBottomWidth: 1,
-    borderBottomColor: "#e5e7eb",
-    paddingBottom: 8,
-    marginBottom: 8,
+    borderBottomColor: "#ececec",
+    paddingVertical: 9,
+    paddingHorizontal: 10,
   },
   tableRow: {
     flexDirection: "row" as const,
-    paddingVertical: 8,
+    paddingVertical: 9,
+    paddingHorizontal: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "#f3f4f6",
+    borderBottomColor: "#f1f1f1",
+  },
+  tableRowAlt: {
+    backgroundColor: "#fcfcfc",
   },
   tableCol1: { width: "50%" },
-  tableCol2: { width: "15%", textAlign: "right" as const },
+  tableCol2: { width: "12%", textAlign: "right" as const },
   tableCol3: { width: "17.5%", textAlign: "right" as const },
-  tableCol4: { width: "17.5%", textAlign: "right" as const },
+  tableCol4: { width: "20.5%", textAlign: "right" as const },
   tableHeaderText: {
     fontSize: 9,
     fontWeight: "bold",
-    color: "#374151",
+    color: "#4b5563",
     textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
   tableCellText: { fontSize: 10, color: "#1a1a1a" },
+  tableDescriptionSubtext: {
+    fontSize: 9,
+    color: "#6b7280",
+    marginTop: 2,
+  },
   totals: {
     marginLeft: "auto",
-    width: "40%",
-    marginTop: 10,
+    width: "44%",
+    marginTop: 4,
+    borderTopWidth: 1,
+    borderTopColor: "#ececec",
+    paddingTop: 10,
   },
   totalRow: {
     flexDirection: "row" as const,
     justifyContent: "space-between",
-    paddingVertical: 6,
+    paddingVertical: 4,
   },
-  totalLabel: { fontSize: 10, color: "#666666" },
-  totalValue: { fontSize: 10, color: "#1a1a1a", fontWeight: "bold" },
+  totalLabel: { fontSize: 10, color: "#71717a" },
+  totalValue: { fontSize: 10, color: "#1a1a1a" },
   grandTotal: {
-    borderTopWidth: 2,
-    borderTopColor: "#1a1a1a",
-    paddingTop: 8,
-    marginTop: 4,
+    borderTopWidth: 1,
+    borderTopColor: "#d4d4d8",
+    paddingTop: 7,
+    marginTop: 5,
   },
-  grandTotalLabel: { fontSize: 12, fontWeight: "bold", color: "#1a1a1a" },
-  grandTotalValue: { fontSize: 12, fontWeight: "bold", color: "#1a1a1a" },
+  grandTotalLabel: { fontSize: 12, fontWeight: "bold", color: "#111827" },
+  grandTotalValue: { fontSize: 13, fontWeight: "bold", color: "#111827" },
   notes: {
-    marginTop: 30,
-    padding: 15,
+    marginTop: 24,
+    padding: 13,
     backgroundColor: "#f9fafb",
-    borderRadius: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#ececec",
   },
   notesLabel: {
     fontSize: 9,
-    color: "#666666",
+    color: "#6b7280",
     marginBottom: 6,
     textTransform: "uppercase",
+    letterSpacing: 0.9,
   },
   notesText: { fontSize: 10, color: "#1a1a1a", lineHeight: 1.5 },
+  footer: {
+    marginTop: 24,
+    borderTopWidth: 1,
+    borderTopColor: "#e5e7eb",
+    paddingTop: 9,
+  },
+  footerText: {
+    textAlign: "center" as const,
+    fontSize: 8.5,
+    color: "#9ca3af",
+  },
 });
 
 function formatCurrency(amount: number, currency: string): string {
@@ -157,41 +231,40 @@ const ProposalPdfDocument: React.FC<{ data: ProposalData }> = ({ data }) => (
   <Document>
     <Page size="A4" style={styles.page}>
       <View style={styles.header}>
-        <Text style={styles.title}>{data.title}</Text>
-        <Text style={styles.subtitle}>
-          Proposal #{data.proposalNumber} • {data.date}
-          {data.validUntil ? ` • Valid until ${data.validUntil}` : ""}
-        </Text>
-      </View>
-
-      <View style={styles.row}>
-        <View style={styles.column}>
-          {data.agencyLogo && (
-            <Image
-              src={data.agencyLogo}
-              style={{ height: 40, marginBottom: 8, objectFit: "contain" }}
-            />
+        <View style={styles.logoBox}>
+          {data.agencyLogo ? (
+            <Image src={data.agencyLogo} style={styles.logoImage} />
+          ) : (
+            <Text style={styles.logoFallbackText}>{data.agencyName}</Text>
           )}
-          <Text style={styles.label}>From</Text>
-          <Text style={styles.value}>{data.agencyName}</Text>
-          {data.agencyEmail && <Text style={styles.value}>{data.agencyEmail}</Text>}
-          {data.agencyPhone && <Text style={styles.value}>{data.agencyPhone}</Text>}
-          {data.agencyAddress && <Text style={styles.value}>{data.agencyAddress}</Text>}
         </View>
-        <View style={styles.column}>
-          <Text style={styles.label}>Proposal details</Text>
-          <Text style={styles.value}>Date: {data.date}</Text>
-          {data.validUntil && (
-            <Text style={styles.value}>Valid until: {data.validUntil}</Text>
-          )}
+
+        <View style={styles.headerRight}>
+          <Text style={styles.proposalTitle}>PROPOSAL</Text>
+          <Text style={styles.proposalMeta}>
+            Proposal #{data.proposalNumber}
+            {"\n"}
+            Date: {data.date}
+            {data.validUntil ? `\nValid Until: ${data.validUntil}` : ""}
+          </Text>
         </View>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.label}>Proposal To</Text>
-        <Text style={styles.value}>{data.clientName}</Text>
-        {data.clientCompany && <Text style={styles.value}>{data.clientCompany}</Text>}
-        {data.clientEmail && <Text style={styles.value}>{data.clientEmail}</Text>}
+      <View style={styles.fromToRow}>
+        <View style={styles.infoColumn}>
+          <Text style={styles.sectionLabel}>From</Text>
+          <Text style={styles.infoValue}>{data.agencyName}</Text>
+          {data.agencyEmail && <Text style={styles.infoValue}>{data.agencyEmail}</Text>}
+          {data.agencyPhone && <Text style={styles.infoValue}>{data.agencyPhone}</Text>}
+          {data.agencyAddress && <Text style={styles.infoValue}>{data.agencyAddress}</Text>}
+        </View>
+
+        <View style={styles.infoColumn}>
+          <Text style={styles.sectionLabel}>To</Text>
+          <Text style={styles.infoValue}>{data.clientName}</Text>
+          {data.clientCompany && <Text style={styles.infoValue}>{data.clientCompany}</Text>}
+          {data.clientEmail && <Text style={styles.infoValue}>{data.clientEmail}</Text>}
+        </View>
       </View>
 
       <View style={styles.table}>
@@ -202,12 +275,19 @@ const ProposalPdfDocument: React.FC<{ data: ProposalData }> = ({ data }) => (
           <Text style={[styles.tableCol4, styles.tableHeaderText]}>Amount</Text>
         </View>
         {data.items.map((item, index) => (
-          <View key={item.id || index} style={styles.tableRow}>
+          <View
+            key={item.id || index}
+            style={[
+              styles.tableRow,
+              index % 2 === 1 ? styles.tableRowAlt : null,
+              index === data.items.length - 1 ? { borderBottomWidth: 0 } : null,
+            ]}
+          >
             <View style={styles.tableCol1}>
-              <Text style={styles.tableCellText}>{item.title}</Text>
-              {item.description && (
-                <Text style={[styles.tableCellText, { fontSize: 9, color: "#666" }]}>
-                  {item.description}
+              <Text style={styles.tableCellText}>{item.description?.trim() || item.title}</Text>
+              {item.description?.trim() && item.title !== item.description && (
+                <Text style={styles.tableDescriptionSubtext}>
+                  {item.title}
                 </Text>
               )}
             </View>
@@ -249,6 +329,10 @@ const ProposalPdfDocument: React.FC<{ data: ProposalData }> = ({ data }) => (
           <Text style={styles.notesText}>{data.notes}</Text>
         </View>
       )}
+
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>Generated by Draftup</Text>
+      </View>
     </Page>
   </Document>
 );
