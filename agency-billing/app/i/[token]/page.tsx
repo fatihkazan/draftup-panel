@@ -44,6 +44,8 @@ type AgencySettings = {
   iban: string;
   swift: string;
   payment_note: string;
+  stripe_account_id?: string | null;
+  stripe_onboarding_completed?: boolean | null;
 };
 
 // ============================================
@@ -303,7 +305,7 @@ export default function PublicInvoicePage() {
       const { data: ag, error: agErr } = await supabase
         .from("agency_settings")
         .select(
-          "agency_name, email, phone, address, payment_label, iban, swift, payment_note"
+          "agency_name, email, phone, address, payment_label, iban, swift, payment_note, stripe_account_id, stripe_onboarding_completed"
         )
         .eq("user_id", ownerId)
         .maybeSingle();
@@ -345,6 +347,9 @@ export default function PublicInvoicePage() {
   const iban = agency?.iban?.trim() || "";
   const swift = agency?.swift?.trim() || "";
   const paymentNote = agency?.payment_note?.trim() || "";
+  const stripeConnected =
+    !!agency?.stripe_account_id && !!agency?.stripe_onboarding_completed;
+  const isInvoicePaid = invoice?.status === "paid" || !!invoice?.paid;
 
   // ============================================
   // PRINT MODE: Full inline styles (PDF-safe)
@@ -850,6 +855,24 @@ export default function PublicInvoicePage() {
                   <div className="text-xs font-medium text-zinc-500">
                     Payment
                   </div>
+                  {isInvoicePaid ? (
+                    <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700">
+                      This invoice has been paid
+                    </div>
+                  ) : stripeConnected ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (invoice?.id) {
+                          window.location.href = `/pay/${invoice.id}`;
+                        }
+                      }}
+                      className="mt-3 w-full rounded-lg bg-accent px-3 py-2 text-sm font-semibold text-accent-foreground transition-colors hover:bg-accent/90"
+                    >
+                      Pay Online
+                    </button>
+                  ) : null}
+
                   <div className="mt-2 text-base font-semibold">
                     {paymentLabel}
                   </div>
