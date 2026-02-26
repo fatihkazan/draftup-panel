@@ -3,12 +3,16 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { normalizePlanKey, type PlanKey } from "@/lib/subscription-plans";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 type Ticket = {
   id: string;
   subject: string;
   status: string;
   created_at: string;
+  description: string | null;
+  reply: string | null;
+  replied_at: string | null;
 };
 
 function getStatusLabel(status: string): string {
@@ -39,6 +43,7 @@ export default function SupportPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [expandedTickets, setExpandedTickets] = useState<Record<string, boolean>>({});
 
   const isPriorityPlan = useMemo(() => plan === "growth" || plan === "scale", [plan]);
 
@@ -78,7 +83,7 @@ export default function SupportPage() {
 
     const { data: ticketData, error: ticketError } = await supabase
       .from("support_tickets")
-      .select("id, subject, status, created_at")
+      .select("id, subject, status, created_at, description, reply, replied_at")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
@@ -92,7 +97,15 @@ export default function SupportPage() {
     setLoadingPage(false);
   }
 
+  function toggleTicket(ticketId: string) {
+    setExpandedTickets((prev) => ({
+      ...prev,
+      [ticketId]: !prev[ticketId],
+    }));
+  }
+
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
+    console.log("[Support] onSubmit fired");
     event.preventDefault();
 
     if (!userId) return;
@@ -106,16 +119,33 @@ export default function SupportPage() {
     setSuccess("");
 
     const priority = isPriorityPlan ? "high" : "normal";
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session?.access_token) {
+      setSubmitting(false);
+      setError("You must be logged in to open a ticket.");
+      return;
+    }
 
-    const { error: insertError } = await supabase.from("support_tickets").insert({
-      user_id: userId,
-      subject: subject.trim(),
-      description: description.trim(),
-      priority,
-      plan,
+    console.log("[Support] sending request", { subject, description });
+    const response = await fetch("/api/support/tickets", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        subject: subject.trim(),
+        description: description.trim(),
+        priority,
+        plan,
+      }),
     });
-
-    if (insertError) {
+    console.log("[Support] response status", response.status);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.log("[Support] error response", errorText);
       setSubmitting(false);
       setError("Could not open ticket. Please try again.");
       return;
@@ -201,21 +231,71 @@ export default function SupportPage() {
               {tickets.map((ticket) => (
                 <div
                   key={ticket.id}
-                  className="flex items-start justify-between gap-4 rounded-xl border border-border bg-secondary/50 px-4 py-3"
+                  className="rounded-xl border border-border bg-secondary/50 px-4 py-3"
                 >
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-foreground">{ticket.subject}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {new Date(ticket.created_at).toLocaleDateString("en-GB", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </p>
-                  </div>
-                  <span className={`shrink-0 rounded-md px-2.5 py-1 text-xs font-medium ${getStatusClasses(ticket.status)}`}>
-                    {getStatusLabel(ticket.status)}
-                  </span>
+                  <button
+                    type="button"
+                    onClick={() => toggleTicket(ticket.id)}
+                    className="flex w-full items-start justify-between gap-4 text-left"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-foreground">{ticket.subject}</p>
+                      <p className="mt-1 text-xs text-zinc-400">Ticket #{ticket.id.slice(0, 8)}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {new Date(ticket.created_at).toLocaleDateString("en-GB", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <span className={`rounded-md px-2.5 py-1 text-xs font-medium ${getStatusClasses(ticket.status)}`}>
+                        {getStatusLabel(ticket.status)}
+                      </span>
+                      {expandedTickets[ticket.id] ? (
+                        <ChevronUp size={16} className="text-zinc-400" />
+                      ) : (
+                        <ChevronDown size={16} className="text-zinc-400" />
+                      )}
+                    </div>
+                  </button>
+
+                  {expandedTickets[ticket.id] && (
+                    <div className="mt-4 space-y-4 border-t border-border pt-4">
+                      <div>
+                        <p className="mb-1 text-xs font-medium uppercase tracking-wide text-zinc-400">
+                          Original Message
+                        </p>
+                        <p className="whitespace-pre-wrap text-sm text-zinc-200">
+                          {ticket.description?.trim() || "No description provided."}
+                        </p>
+                      </div>
+
+                      {ticket.reply?.trim() ? (
+                        <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3">
+                          <p className="mb-1 text-xs font-medium uppercase tracking-wide text-emerald-300">
+                            Admin Reply
+                          </p>
+                          <p className="whitespace-pre-wrap text-sm text-zinc-100">{ticket.reply}</p>
+                          {ticket.replied_at && (
+                            <p className="mt-2 text-xs text-zinc-400">
+                              Replied on{" "}
+                              {new Date(ticket.replied_at).toLocaleString("en-GB", {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </p>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-zinc-400">Awaiting response...</p>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
