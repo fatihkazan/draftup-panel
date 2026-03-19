@@ -10,11 +10,23 @@ import {
   type PlanKey,
 } from "@/lib/subscription-plans";
 
-const CHECKOUT_URLS: Record<PlanKey, string> = {
-  freelancer: "https://draftup.lemonsqueezy.com/checkout/buy/929f6b32-b7e5-4364-b8e8-f3f923d75cb2",
-  starter: "https://draftup.lemonsqueezy.com/checkout/buy/c4f2026b-d6d0-4426-9d7f-40aa3bb0feeb",
-  growth: "https://draftup.lemonsqueezy.com/checkout/buy/782eb6ff-2248-4ed3-8998-6f1b92f74712",
-  scale: "https://draftup.lemonsqueezy.com/checkout/buy/700085c2-d105-4c79-8200-cdd78ea01cf7",
+const CHECKOUT_URLS: Record<PlanKey, { monthly: string; yearly: string }> = {
+  freelancer: {
+    monthly: "https://checkout.dodopayments.com/buy/pdt_0NarHsqFyT92DhNEduv8O",
+    yearly: "https://checkout.dodopayments.com/buy/pdt_0NarI3IFBkxZXmgdRRYvr",
+  },
+  starter: {
+    monthly: "https://checkout.dodopayments.com/buy/pdt_0NarIEtZehknqLuAmhlgp",
+    yearly: "https://checkout.dodopayments.com/buy/pdt_0NarIJmbS0BV1Ccm6AIOH",
+  },
+  growth: {
+    monthly: "https://checkout.dodopayments.com/buy/pdt_0NarIXmeRgdp5EDnXn9lP",
+    yearly: "https://checkout.dodopayments.com/buy/pdt_0NarIf9c6LWQaHbj3fPBI",
+  },
+  scale: {
+    monthly: "https://checkout.dodopayments.com/buy/pdt_0NarIjRzRih1zOVDHA6ex",
+    yearly: "https://checkout.dodopayments.com/buy/pdt_0NarIok4U4CFqP4YX2D2B",
+  },
 };
 
 const NEXT_PLAN: Partial<Record<PlanKey, PlanKey>> = {
@@ -31,6 +43,7 @@ export default function SubscriptionPage() {
   const [planKey, setPlanKey] = useState<PlanKey>("freelancer");
   const [activeUserCount, setActiveUserCount] = useState(1);
   const [userId, setUserId] = useState("");
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
 
   useEffect(() => {
     load();
@@ -109,13 +122,14 @@ export default function SubscriptionPage() {
   const userLimit = plan.userLimit;
   const activeUsers = activeUserCount;
 
-  const withCheckoutUserId = (url: string) => {
+  const withCheckoutUserId = (planKey: PlanKey) => {
+    const url = CHECKOUT_URLS[planKey][billingCycle];
     const params = new URLSearchParams();
     if (userId) {
-      params.set("checkout[custom][user_id]", userId);
+      params.set("quantity", "1");
+      params.set("email", "");
     }
-    params.set("checkout[success_url]", CHECKOUT_REDIRECT_URL);
-    return `${url}?${params.toString()}`;
+    return `${url}?quantity=1`;
   };
 
   return (
@@ -133,6 +147,30 @@ export default function SubscriptionPage() {
         </div>
       ) : (
         <div className="space-y-6 max-w-3xl">
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setBillingCycle("monthly")}
+              className={
+                billingCycle === "monthly"
+                  ? "bg-accent text-accent-foreground rounded-lg px-4 py-2 text-sm font-medium"
+                  : "bg-secondary text-muted-foreground rounded-lg px-4 py-2 text-sm font-medium"
+              }
+            >
+              Monthly
+            </button>
+            <button
+              type="button"
+              onClick={() => setBillingCycle("yearly")}
+              className={
+                billingCycle === "yearly"
+                  ? "bg-accent text-accent-foreground rounded-lg px-4 py-2 text-sm font-medium"
+                  : "bg-secondary text-muted-foreground rounded-lg px-4 py-2 text-sm font-medium"
+              }
+            >
+              Yearly
+            </button>
+          </div>
           <div className="rounded-2xl bg-card border border-border p-6">
             <div className="flex items-center justify-between gap-4 mb-4">
               <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
@@ -141,7 +179,7 @@ export default function SubscriptionPage() {
               </h3>
               {userId && nextPlanKey && (
                 <a
-                  href={withCheckoutUserId(CHECKOUT_URLS[nextPlanKey])}
+                  href={withCheckoutUserId(nextPlanKey)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="shrink-0 rounded-xl bg-[#10b981] px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent/90 transition-colors"
