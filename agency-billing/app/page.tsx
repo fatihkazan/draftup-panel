@@ -9,7 +9,7 @@ export default function RootPage() {
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) {
-        router.replace("/invoices");
+        router.replace("/dashboard");
       } else {
         router.replace("/login");
       }
