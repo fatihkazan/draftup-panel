@@ -25,7 +25,7 @@ Please find your invoice ${invoiceNumber} attached.
 Best regards,
 ${agencyName}`;
 
-  const from = process.env.RESEND_FROM_EMAIL ?? "Invoices <invoices@resend.dev>";
+  const from = process.env.RESEND_FROM_EMAIL ?? "Invoices <invoices@draftup.co>";
 
   return resend.emails.send({
     from,

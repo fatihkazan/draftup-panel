@@ -104,7 +104,7 @@ export async function POST(
       html: string;
       attachments?: { filename: string; content: string }[];
     } = {
-      from: "draftup <invoices@resend.dev>",
+      from: "draftup <invoices@draftup.co>",
       to: process.env.TEST_EMAIL || invoice.client.email,
       subject: `Invoice ${invoice.invoice_number} from ${invoice.agency?.agency_name || 'draftup'}`,
 

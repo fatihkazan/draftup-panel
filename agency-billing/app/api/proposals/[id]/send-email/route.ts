@@ -79,7 +79,7 @@ export async function POST(
 
     // Send email
     const { data: emailData, error: emailError } = await resend.emails.send({
-      from: "draftup <invoices@resend.dev>", // Will change this to your domain
+      from: "draftup <invoices@draftup.co>", // Will change this to your domain
       to: process.env.TEST_EMAIL || proposal.client.email,
       subject: `New Proposal: ${proposal.title}`,
       html: `
