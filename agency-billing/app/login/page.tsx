@@ -36,7 +36,7 @@ export default function LoginPage() {
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/login-bg.jpg"
+          src="/login-bg2.jpg"
           alt="Background"
           fill
           priority
