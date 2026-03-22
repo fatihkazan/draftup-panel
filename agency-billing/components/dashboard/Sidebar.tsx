@@ -39,7 +39,7 @@ const navigation: NavSection[] = [
   {
     title: "Main",
     items: [
-      { label: "Dashboard", href: "/", icon: LayoutDashboard },
+      { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
       { label: "Clients", href: "/clients", icon: Users },
       { label: "Proposals", href: "/proposals", icon: FileText },
       { label: "Invoices", href: "/invoices", icon: Receipt },
