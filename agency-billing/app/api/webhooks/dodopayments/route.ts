@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
+import { NextRequest, NextResponse } from "next/server";
 import { Webhook } from "standardwebhooks";
 import { createServerClient } from "@/lib/supabaseServer";
 import { PLAN_KEYS, type PlanKey } from "@/lib/subscription-plans";
@@ -28,66 +28,40 @@ function resolveBillingCycle(productName: string): "monthly" | "yearly" {
 
 export async function POST(req: NextRequest) {
   const rawBody = await req.text();
-
   const webhookHeaders = {
     "webhook-id": req.headers.get("webhook-id") || "",
     "webhook-signature": req.headers.get("webhook-signature") || "",
     "webhook-timestamp": req.headers.get("webhook-timestamp") || "",
   };
-
-  // Verify signature
   try {
     const wh = new Webhook(process.env.DODO_PAYMENTS_WEBHOOK_SECRET!);
     await wh.verify(rawBody, webhookHeaders);
   } catch {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
-
-  const payload = JSON.parse(rawBody) as {
-    type?: string;
-    data?: {
-      customer?: { email?: string; customer_id?: string };
-      product_name?: string;
-      items?: { product_name?: string }[];
-    };
-  };
+  const payload = JSON.parse(rawBody);
   const eventType = payload.type as string;
-
   if (!HANDLED_EVENTS.has(eventType)) {
     return NextResponse.json({ received: true });
   }
-
   const supabase = createServerClient();
-
   try {
     const data = payload.data;
-
-    // Get customer email and product info
     const customerEmail = data?.customer?.email as string | undefined;
     const productName = (data?.product_name || data?.items?.[0]?.product_name || "") as string;
-    const customerId = data?.customer?.customer_id as string | undefined;
-
     if (!customerEmail) {
       return NextResponse.json({ received: true });
     }
-
-    // Resolve plan
     const planKey = resolvePlanKey(productName);
     const billingCycle = resolveBillingCycle(productName);
-
     if (!planKey) {
       console.error("Could not resolve plan from product name:", productName);
       return NextResponse.json({ received: true });
     }
-
-    // Find user by email
     const { data: { users }, error: userError } = await supabase.auth.admin.listUsers();
     if (userError) throw userError;
-
-    const user = users.find((u) => u.email === customerEmail);
-
+    const user = users.find(u => u.email === customerEmail);
     if (user) {
-      // Existing user - update their subscription
       await supabase
         .from("agency_settings")
         .update({
@@ -97,11 +71,9 @@ export async function POST(req: NextRequest) {
         })
         .eq("user_id", user.id);
     } else {
-      // New user - create registration token
       if (eventType === "payment.succeeded" || eventType === "subscription.active") {
         const token = crypto.randomUUID();
         const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-
         await supabase.from("registration_tokens").insert({
           token,
           email: customerEmail,
@@ -111,7 +83,6 @@ export async function POST(req: NextRequest) {
         });
       }
     }
-
     return NextResponse.json({ received: true });
   } catch (error) {
     console.error("Webhook error:", error);
