@@ -33,7 +33,7 @@ export default function LoginPage() {
 
     if (data.session) {
       await new Promise((resolve) => setTimeout(resolve, 500));
-      window.location.href = "/clients";
+      window.location.href = "/";
     }
   }
 
